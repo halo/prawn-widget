@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    prawn-widget (2.0.0)
+    prawn-widget (2.0.1)
       activesupport
       calls
 

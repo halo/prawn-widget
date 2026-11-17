@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0 (unreleased)
+## 2.0.1
 
 Modernization on the road to `prawn-widget`.
 
