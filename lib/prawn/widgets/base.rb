@@ -130,9 +130,6 @@ module Prawn
         end
       end
 
-      # Backwards compatibility for the `prawn-component` days.
-      alias build_slot_component build_slot_widget
-
       def get_slot(slot_name)
         @_set_slots ||= {}
 

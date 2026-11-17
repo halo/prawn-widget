@@ -12,7 +12,4 @@ require 'prawn/widgets/slot'
 module Prawn
   class Widget < ::Prawn::Widgets::Base
   end
-
-  # Backwards compatibility for the `prawn-component` days.
-  Components = Widgets unless const_defined?(:Components)
 end

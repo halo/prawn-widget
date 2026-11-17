@@ -9,9 +9,6 @@ module Prawn
     class Slot
       attr_writer :_widget_instance, :_content_block
 
-      # Backwards compatibility for the `prawn-component` days.
-      alias _component_instance= _widget_instance=
-
       def initialize(parent)
         @parent = parent
       end
@@ -36,11 +33,6 @@ module Prawn
 
       def respond_to_missing?(symbol, include_all = false)
         defined?(@_widget_instance) && @_widget_instance.respond_to?(symbol, include_all)
-      end
-
-      # Backwards compatibility for the `prawn-component` days.
-      def _component_instance
-        @_widget_instance
       end
     end
   end
