@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class RealDocumentComponent < Prawn::Component
+class RealDocumentComponent < Prawn::Widget
   renders_one :heading
   renders_many :paragraphs
 

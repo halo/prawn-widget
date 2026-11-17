@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    prawn-components (2.0.0)
+    prawn-widget (2.0.0)
       activesupport
       calls
 
@@ -87,7 +87,7 @@ DEPENDENCIES
   matrix
   megatest
   prawn
-  prawn-components!
+  prawn-widget!
   rake
   rubocop
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # SPDX-License-Identifier: MIT
-class BoxComponent < Prawn::Component
+class BoxComponent < Prawn::Widget
   renders_one :title
   renders_one :description
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # SPDX-License-Identifier: MIT
-class StreetComponent < Prawn::Component
+class StreetComponent < Prawn::Widget
   renders_many :cars
 
   def call

@@ -5,7 +5,7 @@ require File.expand_path('lib/prawn/components/version', __dir__)
 Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 4.0'
 
-  spec.name        = 'prawn-components'
+  spec.name        = 'prawn-widget'
   spec.version     = Prawn::Components::VERSION::STRING
   spec.summary     = 'The gem `view_component` syntax, but implemented for Prawn.'
   spec.description = "#{spec.summary} So you can create reusable components."

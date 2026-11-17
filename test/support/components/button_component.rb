@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # SPDX-License-Identifier: MIT
-class ButtonComponent < Prawn::Component
+class ButtonComponent < Prawn::Widget
   renders_one :title
 
   def call

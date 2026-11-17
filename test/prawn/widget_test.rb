@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # SPDX-License-Identifier: MIT
-class PrawnComponentTest < Megatest::Test
+class PrawnWidgetTest < Megatest::Test
   test '#render_in - with a simple call statement - draws the content' do
     pdf = []
 

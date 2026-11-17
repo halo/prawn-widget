@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # SPDX-License-Identifier: MIT
-class BlogComponent < Prawn::Component
+class BlogComponent < Prawn::Widget
   renders_many :articles, ArticleComponent
 
   def call

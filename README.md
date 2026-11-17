@@ -7,7 +7,7 @@
 > ```
 > **New here?** Use the renamed gem from RubyGems:
 > ```ruby
-> gem 'prawn-components' # Not a typo. It ends with "s"
+> gem 'prawn-widget'
 > ```
 
 ## TL;DR
@@ -21,7 +21,7 @@ don't have templates. We're in all-ruby land and the implementation resides in t
 
 ```ruby
 # app/components/hello_world_component.rb
-class HelloWorldComponent < Prawn::Component
+class HelloWorldComponent < Prawn::Widget
   def call
     pdf.text 'Hello World!'
   end
@@ -44,7 +44,7 @@ Slots are set with `with_*` methods (e.g. `box.with_title`, `blog.with_article`)
 
 ```ruby
 # app/components/box_component.rb
-class BoxComponent < Prawn::Component
+class BoxComponent < Prawn::Widget
   renders_one :title, TitleComponent
   renders_one :description
   renders_many :comments
@@ -58,7 +58,7 @@ class BoxComponent < Prawn::Component
 end
 
 # app/components/title_component.rb
-class TitleComponent < Prawn::Component
+class TitleComponent < Prawn::Widget
   renders_one :content
 
   def call
@@ -97,7 +97,7 @@ You can define params and options like with the [calls](https://github.com/halo/
 
 ```ruby
 # app/components/title_component.rb
-class SayItComponent < Prawn::Component
+class SayItComponent < Prawn::Widget
   option :message
 
   def call
@@ -119,7 +119,7 @@ Of course you could render a component inside of another component:
 
 ```ruby
 # app/components/blog_component.rb
-class BlogComponent < Prawn::Component
+class BlogComponent < Prawn::Widget
   renders_many :articles, ArticleComponent
 
   def call
@@ -129,7 +129,7 @@ class BlogComponent < Prawn::Component
 end
 
 # app/components/article_component.rb
-class ArticleComponent < Prawn::Component
+class ArticleComponent < Prawn::Widget
   renders_one :title
   renders_one :body
 

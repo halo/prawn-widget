@@ -2,12 +2,12 @@
 
 ## 2.0.0 (unreleased)
 
-Modernization on the road to `prawn-components`.
+Modernization on the road to `prawn-widget`.
 
 ### Renamed
 
-- Gem renamed `prawn-component` to `prawn-components` (the old name is taken on RubyGems).
-- The Ruby API is unchanged: components still inherit from `Prawn::Component`.
+- Gem renamed `prawn-component` to `prawn-widget` (the old name is taken on RubyGems).
+- The Ruby API is unchanged: components still inherit from `Prawn::Widget`.
 
 ### Changed
 

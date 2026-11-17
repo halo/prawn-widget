@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 # SPDX-License-Identifier: MIT
-class HiddenSlotComponent < Prawn::Component
+class HiddenSlotComponent < Prawn::Widget
   renders_one :secret
 
   def call; end
 end
 
-class RequiredOptionSlotComponent < Prawn::Component
+class RequiredOptionSlotComponent < Prawn::Widget
   option :message
 
   def call
@@ -15,7 +15,7 @@ class RequiredOptionSlotComponent < Prawn::Component
   end
 end
 
-class SkippedSlotComponent < Prawn::Component
+class SkippedSlotComponent < Prawn::Widget
   renders_one :title
 
   def call
@@ -104,7 +104,7 @@ class PrawnBaseTest < Megatest::Test
 
   test '.param - with default value - raises an error' do
     assert_raises(ArgumentError) do
-      Class.new(Prawn::Component) do
+      Class.new(Prawn::Widget) do
         param :name, default: -> { 'nobody' }
       end
     end

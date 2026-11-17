@@ -10,6 +10,6 @@ require 'prawn/components/base'
 require 'prawn/components/slot'
 
 module Prawn
-  class Component < ::Prawn::Components::Base
+  class Widget < ::Prawn::Components::Base
   end
 end
