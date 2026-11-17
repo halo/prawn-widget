@@ -7,3 +7,7 @@
 
 # Generated test output
 /tmp/
+
+# Built gems
+*.gem
+/pkg/
