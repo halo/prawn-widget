@@ -12,8 +12,7 @@ Modernization on the road to `prawn-components`.
 ### Changed
 
 - Slot setters follow the current ViewComponent API: `with_title`, `with_article`, `with_articles`.
-- The old bare setters (`title`, `article`) still work but emit a deprecation warning.
-- Every slot has a predicate (`title?`, `articles?`).
+- The old bare setters (`title`, `article`) were removed.
 
 ### Removed
 

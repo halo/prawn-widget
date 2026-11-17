@@ -76,36 +76,6 @@ class PrawnComponentTest < Megatest::Test
                  pdf.join
   end
 
-  test '#render_in - with deprecated singular setter - warns and draws the content' do
-    pdf = []
-
-    _, stderr = capture_io do
-      BoxComponent.new.render_in(pdf) do |box|
-        box.title do
-          pdf.push 'TITLE'
-        end
-      end
-    end
-
-    assert_equal ['<<', 'TITLE', '>>'], pdf
-    assert_match(/DEPRECATION.*with_title/, stderr)
-  end
-
-  test '#render_in - with deprecated collection setter - warns and draws each block' do
-    pdf = []
-
-    _, stderr = capture_io do
-      StreetComponent.new.render_in(pdf) do |street|
-        street.car do
-          pdf.push 'Ford'
-        end
-      end
-    end
-
-    assert_equal ['Car:', 'Ford'], pdf
-    assert_match(/DEPRECATION.*with_car/, stderr)
-  end
-
   test '#call_in - with an explicit block - does not yield upfront' do
     pdf = []
 

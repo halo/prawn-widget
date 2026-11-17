@@ -22,8 +22,8 @@ module Prawn
           set_slot(slot_name, *args, **kwargs, &block)
         end
 
-        define_method(slot_name) do |*args, **kwargs, &block|
-          set_or_get_deprecated(slot_name, :"with_#{slot_name}", *args, **kwargs, &block)
+        define_method(slot_name) do
+          get_slot(slot_name)
         end
 
         register_slot(slot_name, collection: false, callable:)
@@ -32,16 +32,10 @@ module Prawn
       def self.renders_many(slot_name, callable = nil)
         singular_name = ActiveSupport::Inflector.singularize(slot_name)
 
-        define_method(:"with_#{singular_name}") do |*args, **kwargs, &block|
-          set_slot(slot_name, *args, **kwargs, &block)
-        end
-
         # Define setter for singular names
         # e.g. `renders_many :items` allows fetching all tabs with
-        # `component.tabs` and setting a tab with `component.tab`
-        define_method(singular_name) do |*args, **kwargs, &block|
-          deprecate(singular_name, :"with_#{singular_name}")
-
+        # `component.tabs` and setting a tab with `component.with_tab`
+        define_method(:"with_#{singular_name}") do |*args, **kwargs, &block|
           set_slot(slot_name, *args, **kwargs, &block)
         end
 
@@ -51,14 +45,8 @@ module Prawn
           set_many_slots(slot_name, collection_args, &block)
         end
 
-        define_method(slot_name) do |collection_args = nil, &block|
-          if collection_args.nil? && block.nil?
-            get_slot(slot_name)
-          else
-            deprecate(slot_name, :"with_#{slot_name}")
-
-            set_many_slots(slot_name, collection_args, &block)
-          end
+        define_method(slot_name) do
+          get_slot(slot_name)
         end
 
         register_slot(slot_name, collection: true, callable:)
@@ -173,24 +161,6 @@ module Prawn
       end
 
       private
-
-      # Tell the caller about the new spelling, then carry on with it.
-      # The old spelling keeps working until the next major release.
-      def deprecate(old_name, new_name)
-        warn "[prawn-components] DEPRECATION: `#{old_name}` is deprecated, use `#{new_name}` instead."
-      end
-
-      # Reads the slot when called bare, warns and writes it otherwise.
-      # Keeps the old spelling working next to the `with_` spelling.
-      def set_or_get_deprecated(slot_name, new_name, *args, **kwargs, &block)
-        if args.empty? && kwargs.empty? && block.nil?
-          get_slot(slot_name)
-        else
-          deprecate(slot_name, new_name)
-
-          set_slot(slot_name, *args, **kwargs, &block)
-        end
-      end
 
       # Adds one slot per entry, forwarding each entry to the slot constructor.
       def set_many_slots(slot_name, collection_args, &)

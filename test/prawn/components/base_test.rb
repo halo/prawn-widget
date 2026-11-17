@@ -79,17 +79,6 @@ class PrawnBaseTest < Megatest::Test
     assert_equal 2, component.cars.length
   end
 
-  test '.renders_many - with deprecated plural setter - warns and sets the slots' do
-    component = StreetComponent.new
-
-    _, stderr = capture_io do
-      component.cars(%w[Ford Mercedes])
-    end
-
-    assert_equal 2, component.cars.length
-    assert_match(/DEPRECATION.*with_cars/, stderr)
-  end
-
   test '.inherited - with slot added on a child - parent stays unchanged' do
     child_class = Class.new(HiddenSlotComponent) do
       renders_one :extra

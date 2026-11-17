@@ -41,7 +41,6 @@ You can use `renders_one` and `renders_many` to use subcomponents.
 In fact, when using your component with a block, you must at least use `renders_one` to pass in your content.
 
 Slots are set with `with_*` methods (e.g. `box.with_title`, `blog.with_article`), matching the current `view_component` API.
-The old bare setters (e.g. `box.title`, `blog.article`) still work but emit a deprecation warning.
 
 ```ruby
 # app/components/box_component.rb

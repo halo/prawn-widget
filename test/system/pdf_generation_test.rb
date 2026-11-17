@@ -45,23 +45,4 @@ class PdfGenerationTest < Megatest::Test
     assert_equal '%PDF', File.read(path, 4)
     assert_equal 1, pdf.page_count
   end
-
-  test '.render_in - with deprecated setters - writes a pdf file' do
-    pdf = Prawn::Document.new
-
-    capture_io do
-      RealDocumentComponent.new.render_in(pdf) do |document|
-        document.heading do
-          pdf.text 'Hello'
-        end
-      end
-    end
-
-    path = File.join(@tmpdir, 'legacy.pdf')
-
-    pdf.render_file(path)
-
-    assert File.exist?(path)
-    assert_equal '%PDF', File.read(path, 4)
-  end
 end
