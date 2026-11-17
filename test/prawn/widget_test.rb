@@ -5,7 +5,7 @@ class PrawnWidgetTest < Megatest::Test
   test '#render_in - with a simple call statement - draws the content' do
     pdf = []
 
-    HelloWorldComponent.new.render_in(pdf)
+    HelloWorldWidget.new.render_in(pdf)
 
     assert_equal ['Hello World!'], pdf
   end
@@ -13,7 +13,7 @@ class PrawnWidgetTest < Megatest::Test
   test '#render_in - with one slot - draws the block content' do
     pdf = []
 
-    BoxComponent.new.render_in(pdf) do |box|
+    BoxWidget.new.render_in(pdf) do |box|
       box.with_title do
         pdf.push 'TITLE'
       end
@@ -29,7 +29,7 @@ class PrawnWidgetTest < Megatest::Test
   test '#render_in - with many slots - draws each block' do
     pdf = []
 
-    StreetComponent.new.render_in(pdf) do |street|
+    StreetWidget.new.render_in(pdf) do |street|
       street.with_car do
         pdf.push 'Ford'
       end
@@ -42,10 +42,10 @@ class PrawnWidgetTest < Megatest::Test
     assert_equal ['Car:', 'Ford', 'Car:', 'Mercedes'], pdf
   end
 
-  test '#render_in - with nested subcomponents - draws the whole tree' do
+  test '#render_in - with nested subwidgets - draws the whole tree' do
     pdf = []
 
-    BlogComponent.new.render_in(pdf) do |blog|
+    BlogWidget.new.render_in(pdf) do |blog|
       pdf.push 'Welcome to my Blog'
 
       blog.with_article do |article|
@@ -79,7 +79,7 @@ class PrawnWidgetTest < Megatest::Test
   test '#call_in - with an explicit block - does not yield upfront' do
     pdf = []
 
-    VerticalSpaceComponent.new.call_in(pdf) do
+    VerticalSpaceWidget.new.call_in(pdf) do
       pdf.push 'In between'
     end
 

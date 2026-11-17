@@ -1,11 +1,11 @@
-[![License](http://img.shields.io/badge/license-MIT-blue.svg)](http://github.com/halo/prawn-component/blob/master/LICENSE.md)
+[![License](http://img.shields.io/badge/license-MIT-blue.svg)](http://github.com/halo/prawn-widget/blob/master/LICENSE.md)
 
 > [!NOTE]
 > **Looking for the old API?** Pin the legacy gem:
 > ```ruby
 > gem 'prawn-component', github: 'halo/prawn-component', tag: 'v1.0.0'
 > ```
-> **New here?** Use the renamed gem from RubyGems:
+> **New here?** Use the renamed gem from RubyGems (no `require` option needed):
 > ```ruby
 > gem 'prawn-widget'
 > ```
@@ -16,36 +16,36 @@ This is an implementation of the popular [view_component](https://viewcomponent.
 
 ## Usage
 
-You define a component just like you would using the `view_component` gem. The only difference, of course, is that you
+You define a widget just like you would using the `view_component` gem. The only difference, of course, is that you
 don't have templates. We're in all-ruby land and the implementation resides in the `#call` method.
 
 ```ruby
-# app/components/hello_world_component.rb
-class HelloWorldComponent < Prawn::Widget
+# app/widgets/hello_world_widget.rb
+class HelloWorldWidget < Prawn::Widget
   def call
     pdf.text 'Hello World!'
   end
 end
 ```
 
-To render a component into an existing PDF, use the `#render_in` method:
+To render a widget into an existing PDF, use the `#render_in` method:
 
 ```ruby
 # app/models/generate_some_pdf.rb
 pdf = Prawn::Document.new
 
-HelloWorldComponent.new.render_in(pdf)
+HelloWorldWidget.new.render_in(pdf)
 ```
 
-You can use `renders_one` and `renders_many` to use subcomponents.
-In fact, when using your component with a block, you must at least use `renders_one` to pass in your content.
+You can use `renders_one` and `renders_many` to use subwidgets.
+In fact, when using your widget with a block, you must at least use `renders_one` to pass in your content.
 
 Slots are set with `with_*` methods (e.g. `box.with_title`, `blog.with_article`), matching the current `view_component` API.
 
 ```ruby
-# app/components/box_component.rb
-class BoxComponent < Prawn::Widget
-  renders_one :title, TitleComponent
+# app/widgets/box_widget.rb
+class BoxWidget < Prawn::Widget
+  renders_one :title, TitleWidget
   renders_one :description
   renders_many :comments
 
@@ -57,8 +57,8 @@ class BoxComponent < Prawn::Widget
   end
 end
 
-# app/components/title_component.rb
-class TitleComponent < Prawn::Widget
+# app/widgets/title_widget.rb
+class TitleWidget < Prawn::Widget
   renders_one :content
 
   def call
@@ -68,13 +68,13 @@ class TitleComponent < Prawn::Widget
 end
 ```
 
-And then render the component:
+And then render the widget:
 
 ```ruby
 # app/models/generate_some_pdf.rb
 pdf = Prawn::Document.new
 
-BoxComponent.new.render_in(pdf) do |box|
+BoxWidget.new.render_in(pdf) do |box|
   box.with_title do
     pdf.text 'I am the title'
   end
@@ -96,8 +96,8 @@ end
 You can define params and options like with the [calls](https://github.com/halo/calls) gem (built on [dry-initializer](https://dry-rb.org/gems/dry-initializer)).
 
 ```ruby
-# app/components/title_component.rb
-class SayItComponent < Prawn::Widget
+# app/widgets/title_widget.rb
+class SayItWidget < Prawn::Widget
   option :message
 
   def call
@@ -112,15 +112,15 @@ And call it like so:
 # app/models/generate_some_pdf.rb
 pdf = Prawn::Document.new
 
-SayItComponent.new(message: 'Hello!').render_in(pdf) do |box|
+SayItWidget.new(message: 'Hello!').render_in(pdf) do |box|
 ```
 
-Of course you could render a component inside of another component:
+Of course you could render a widget inside of another widget:
 
 ```ruby
-# app/components/blog_component.rb
-class BlogComponent < Prawn::Widget
-  renders_many :articles, ArticleComponent
+# app/widgets/blog_widget.rb
+class BlogWidget < Prawn::Widget
+  renders_many :articles, ArticleWidget
 
   def call
     pdf.push 'Welcome to my blog'
@@ -128,13 +128,13 @@ class BlogComponent < Prawn::Widget
   end
 end
 
-# app/components/article_component.rb
-class ArticleComponent < Prawn::Widget
+# app/widgets/article_widget.rb
+class ArticleWidget < Prawn::Widget
   renders_one :title
   renders_one :body
 
   def call
-    TitleComponent.new.render_in(pdf) do |title|
+    TitleWidget.new.render_in(pdf) do |title|
       title.with_content do
         title.draw
       end
@@ -152,7 +152,7 @@ And render it:
 pdf = Prawn::Document.new
 @comments = load_some_comments!
 
-BlogComponent.new.render_in(pdf) do |blog|
+BlogWidget.new.render_in(pdf) do |blog|
   blog.with_article do |article|
     article.with_title do
       pdf.text 'Breaking news'
@@ -176,7 +176,7 @@ That means, we cannot use wrappers like this:
 
 ```ruby
 # Would be nice but does NOT work.
-ButtonComponent.new.render_in(pdf) do
+ButtonWidget.new.render_in(pdf) do
   pdf.text 'I am a button'
 end
 ```
@@ -185,7 +185,7 @@ Instead we're forced to use this:
 
 ```ruby
 # Cumbersome, but it has its advantages.
-ButtonComponent.new.render_in(pdf) do |button|
+ButtonWidget.new.render_in(pdf) do |button|
   button.with_title do
     pdf.text 'I am a button'
   end
@@ -196,7 +196,7 @@ The technical reason behind this is this:
 
 ```ruby
 # This causes a problem for the block/yield mechanism.
-BoxComponent.new.render_in(pdf) do |box|
+BoxWidget.new.render_in(pdf) do |box|
   box.with_title do
     pdf.text 'I am the title'
   end
@@ -211,14 +211,14 @@ So you have to use either or: blocks never have arguments or always (which we ch
 
 ## History
 
-When it comes to "resusable components", it's really hard to find the balance between too much opinion and too much flexibility.
+When it comes to "reusable widgets", it's really hard to find the balance between too much opinion and too much flexibility.
 
 For Prawn it might look like
-[this](https://github.com/kaspermeyer/canned_tuna/blob/ea4e05a4ff7b10cd73c3bb3246173a9f0f749b40/example/outlets.rb#L26-L28)
+[this](https://github.com/kaspermeyer/canned_tuna/blob/ea4e05a4ff7b10cd73c3a4173a9f0f749b40/example/outlets.rb#L26-L28)
 or like
 [this](https://github.com/prawnpdf/prawn-component/blob/af0c1e6c9fcac7d036c024a53e18dfe563eb50e3/example/simple.rb#L3)
 or
-[this](https://github.com/neume/sugpoko/blob/1e81c069f6a6cb58431866b1090667d5b8d783ad/README.md#usage).
+[this](https://github.com/neume/sugpoko/blob/1e81c069f6a6cb58431866b10962783ad49d8b3ac/README.md#usage).
 For Rails you might come up with something like
 [this](https://github.com/github/view_component/blob/0afe05da0c3ea5ce99dc431447bcb61359bc6e09/docs/content_areas.md)
 but that's not good enough, so let's use
@@ -231,4 +231,4 @@ So, now that that API is somewhat stable, I felt it was time to use it with Praw
 ## Copyright
 
 MIT 2021 halo, `SPDX-License-Identifier: MIT`.
-See [MIT-LICENSE](http://github.com/halo/prawn-component/blob/master/LICENSE.md).
+See [MIT-LICENSE](http://github.com/halo/prawn-widget/blob/master/LICENSE.md).

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class RealDocumentComponent < Prawn::Widget
+class RealDocumentWidget < Prawn::Widget
   renders_one :heading
   renders_many :paragraphs
 
@@ -22,7 +22,7 @@ class PdfGenerationTest < Megatest::Test
   test '.render_in - with a real document - writes a pdf file' do
     pdf = Prawn::Document.new
 
-    RealDocumentComponent.new.render_in(pdf) do |document|
+    RealDocumentWidget.new.render_in(pdf) do |document|
       document.with_heading do
         pdf.text 'Hello'
       end

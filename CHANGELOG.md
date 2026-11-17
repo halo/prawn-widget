@@ -7,7 +7,10 @@ Modernization on the road to `prawn-widget`.
 ### Renamed
 
 - Gem renamed `prawn-component` to `prawn-widget` (the old name is taken on RubyGems).
-- The Ruby API is unchanged: components still inherit from `Prawn::Widget`.
+- The Ruby API is unchanged: widgets still inherit from `Prawn::Widget`.
+- Internal namespace renamed `Prawn::Components` to `Prawn::Widgets`
+  (`Prawn::Components` remains as an alias, `prawn/widget` still works,
+  but `require 'prawn-widget'` / `gem 'prawn-widget'` without `require:` is now supported).
 
 ### Changed
 
@@ -16,7 +19,7 @@ Modernization on the road to `prawn-widget`.
 
 ### Removed
 
-- String callables (`renders_one :x, "SomeClass"`) are gone; use a component class or a lambda.
+- String callables (`renders_one :x, "SomeClass"`) are gone; use a widget class or a lambda.
 
 ### Tooling
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # SPDX-License-Identifier: MIT
-class ArticleComponent < Prawn::Widget
+class ArticleWidget < Prawn::Widget
   renders_one :title, -> {}
   renders_one :body, -> {}
 

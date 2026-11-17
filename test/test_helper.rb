@@ -6,8 +6,8 @@ $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 require 'megatest/autorun'
 require 'fileutils'
 require 'prawn'
-require 'prawn/widget'
+require 'prawn-widget'
 
-Dir[File.expand_path('support/components/*.rb', __dir__)].each do |support_file|
+Dir[File.expand_path('support/widgets/*.rb', __dir__)].each do |support_file|
   require support_file
 end

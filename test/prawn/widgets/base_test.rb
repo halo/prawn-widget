@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 # SPDX-License-Identifier: MIT
-class HiddenSlotComponent < Prawn::Widget
+class HiddenSlotWidget < Prawn::Widget
   renders_one :secret
 
   def call; end
 end
 
-class RequiredOptionSlotComponent < Prawn::Widget
+class RequiredOptionSlotWidget < Prawn::Widget
   option :message
 
   def call
@@ -15,7 +15,7 @@ class RequiredOptionSlotComponent < Prawn::Widget
   end
 end
 
-class SkippedSlotComponent < Prawn::Widget
+class SkippedSlotWidget < Prawn::Widget
   renders_one :title
 
   def call
@@ -31,56 +31,56 @@ end
 
 class PrawnBaseTest < Megatest::Test
   test '.renders_one - with no slot set - getter is nil' do
-    component = BoxComponent.new
+    widget = BoxWidget.new
 
-    assert_nil component.title
+    assert_nil widget.title
   end
 
   test '.renders_one - with slot set - getter is a slot' do
-    component = BoxComponent.new
+    widget = BoxWidget.new
 
-    slot = component.with_title { 'TITLE' }
+    slot = widget.with_title { 'TITLE' }
 
-    assert_instance_of Prawn::Components::Slot, slot
-    assert_instance_of Prawn::Components::Slot, component.title
+    assert_instance_of Prawn::Widgets::Slot, slot
+    assert_instance_of Prawn::Widgets::Slot, widget.title
   end
 
   test '.renders_one - with bare getter - emits no warning' do
-    component = BoxComponent.new
+    widget = BoxWidget.new
 
     _, stderr = capture_io do
-      component.title
+      widget.title
     end
 
     assert_empty stderr
   end
 
   test '.renders_many - with no slots set - getter is empty' do
-    component = StreetComponent.new
+    widget = StreetWidget.new
 
-    assert_equal [], component.cars
+    assert_equal [], widget.cars
   end
 
   test '.renders_many - with slots set - getter holds each slot' do
-    component = StreetComponent.new
+    widget = StreetWidget.new
 
-    component.with_car { 'Ford' }
-    component.with_car { 'Mercedes' }
+    widget.with_car { 'Ford' }
+    widget.with_car { 'Mercedes' }
 
-    assert_equal 2, component.cars.length
+    assert_equal 2, widget.cars.length
   end
 
   test '.renders_many - with bulk setter - sets one slot per entry' do
-    component = StreetComponent.new
+    widget = StreetWidget.new
 
-    slots = component.with_cars(%w[Ford Mercedes])
+    slots = widget.with_cars(%w[Ford Mercedes])
 
     assert_equal 2, slots.length
-    assert_equal 2, component.cars.length
+    assert_equal 2, widget.cars.length
   end
 
   test '.inherited - with slot added on a child - parent stays unchanged' do
-    child_class = Class.new(HiddenSlotComponent) do
+    child_class = Class.new(HiddenSlotWidget) do
       renders_one :extra
     end
 
@@ -88,18 +88,18 @@ class PrawnBaseTest < Megatest::Test
 
     child.with_extra { 'shh' }
 
-    assert_instance_of Prawn::Components::Slot, child.extra
+    assert_instance_of Prawn::Widgets::Slot, child.extra
     assert child_class.registered_slots.key?(:extra)
-    refute HiddenSlotComponent.registered_slots.key?(:extra)
-    refute_respond_to HiddenSlotComponent.new, :extra
+    refute HiddenSlotWidget.registered_slots.key?(:extra)
+    refute_respond_to HiddenSlotWidget.new, :extra
   end
 
   test '.option - with missing required option - raises an error' do
-    assert_raises(KeyError) { RequiredOptionSlotComponent.new }
+    assert_raises(KeyError) { RequiredOptionSlotWidget.new }
   end
 
   test '.option - with unknown option - raises an error' do
-    assert_raises(KeyError) { RequiredOptionSlotComponent.new(bogus: true) }
+    assert_raises(KeyError) { RequiredOptionSlotWidget.new(bogus: true) }
   end
 
   test '.param - with default value - raises an error' do
@@ -113,7 +113,7 @@ class PrawnBaseTest < Megatest::Test
   test '#render_in - with render? false - skips the call' do
     pdf = []
 
-    SkippedSlotComponent.new.render_in(pdf) do |skipped|
+    SkippedSlotWidget.new.render_in(pdf) do |skipped|
       skipped.with_title { pdf.push 'TITLE' }
     end
 

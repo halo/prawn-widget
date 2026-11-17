@@ -2,12 +2,15 @@
 
 # SPDX-License-Identifier: MIT
 module Prawn
-  module Components
+  module Widgets
     # Adaptation of https://github.com/ViewComponent/view_component/blob/main/lib/view_component/slot.rb
     # But without string capturing.
     # ViewComponent adaptation, MIT (c) 2019 GitHub.
     class Slot
-      attr_writer :_component_instance, :_content_block
+      attr_writer :_widget_instance, :_content_block
+
+      # Backwards compatibility for the `prawn-component` days.
+      alias _component_instance= _widget_instance=
 
       def initialize(parent)
         @parent = parent
@@ -18,21 +21,26 @@ module Prawn
       def draw
         pdf = @parent.send(:pdf)
 
-        if defined?(@_component_instance)
-          @_component_instance.render_in(pdf, &@_content_block)
+        if defined?(@_widget_instance)
+          @_widget_instance.render_in(pdf, &@_content_block)
 
         elsif defined?(@_content_block)
           @_content_block.call
         end
       end
 
-      # Give a component access to its slot instances through this wrapper.
+      # Give a widget access to its slot instances through this wrapper.
       def method_missing(symbol, *, &)
-        @_component_instance.public_send(symbol, *, &)
+        @_widget_instance.public_send(symbol, *, &)
       end
 
       def respond_to_missing?(symbol, include_all = false)
-        defined?(@_component_instance) && @_component_instance.respond_to?(symbol, include_all)
+        defined?(@_widget_instance) && @_widget_instance.respond_to?(symbol, include_all)
+      end
+
+      # Backwards compatibility for the `prawn-component` days.
+      def _component_instance
+        @_widget_instance
       end
     end
   end

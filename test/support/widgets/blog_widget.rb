@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # SPDX-License-Identifier: MIT
-class BlogComponent < Prawn::Widget
-  renders_many :articles, ArticleComponent
+class BlogWidget < Prawn::Widget
+  renders_many :articles, ArticleWidget
 
   def call
     pdf.push '<blog>'

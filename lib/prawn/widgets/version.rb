@@ -2,7 +2,7 @@
 
 # SPDX-License-Identifier: MIT
 module Prawn
-  module Components
+  module Widgets
     module VERSION # :nodoc:
       MAJOR = 2
       MINOR = 0
