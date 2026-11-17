@@ -13,3 +13,6 @@ Lint/UselessAssignment:
 
 Style/HashSyntax:
   EnforcedShorthandSyntax: always
+
+Metrics:
+  Enabled: false

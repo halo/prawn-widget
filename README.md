@@ -1,5 +1,15 @@
 [![License](http://img.shields.io/badge/license-MIT-blue.svg)](http://github.com/halo/prawn-component/blob/master/LICENSE.md)
 
+> [!NOTE]
+> **Looking for the old API?** Pin the legacy gem:
+> ```ruby
+> gem 'prawn-component', github: 'halo/prawn-component', tag: 'v1.0.0'
+> ```
+> **New here?** Use the renamed gem from RubyGems:
+> ```ruby
+> gem 'prawn-components' # Not a typo. It ends with "s"
+> ```
+
 ## TL;DR
 
 This is an implementation of the popular [view_component](https://viewcomponent.org) gem for Prawn.
@@ -29,6 +39,9 @@ HelloWorldComponent.new.render_in(pdf)
 
 You can use `renders_one` and `renders_many` to use subcomponents.
 In fact, when using your component with a block, you must at least use `renders_one` to pass in your content.
+
+Slots are set with `with_*` methods (e.g. `box.with_title`, `blog.with_article`), matching the current `view_component` API.
+The old bare setters (e.g. `box.title`, `blog.article`) still work but emit a deprecation warning.
 
 ```ruby
 # app/components/box_component.rb
@@ -63,25 +76,25 @@ And then render the component:
 pdf = Prawn::Document.new
 
 BoxComponent.new.render_in(pdf) do |box|
-  box.title do
+  box.with_title do
     pdf.text 'I am the title'
   end
 
-  box.description do
+  box.with_description do
     pdf.text 'I am the description'
   end
 
-  box.comment do
+  box.with_comment do
     pdf.text 'First comment'
   end
 
-  box.comment do
+  box.with_comment do
     pdf.text 'Second comment'
   end
 end
 ```
 
-You can define params and options like with the [dry-initializer](https://dry-rb.org/gems/dry-initializer) gem.
+You can define params and options like with the [calls](https://github.com/halo/calls) gem (built on [dry-initializer](https://dry-rb.org/gems/dry-initializer)).
 
 ```ruby
 # app/components/title_component.rb
@@ -123,7 +136,7 @@ class ArticleComponent < Prawn::Component
 
   def call
     TitleComponent.new.render_in(pdf) do |title|
-      title.content do
+      title.with_content do
         title.draw
       end
     end
@@ -141,12 +154,12 @@ pdf = Prawn::Document.new
 @comments = load_some_comments!
 
 BlogComponent.new.render_in(pdf) do |blog|
-  blog.article do |article|
-    article.title do
+  blog.with_article do |article|
+    article.with_title do
       pdf.text 'Breaking news'
     end
 
-    article.body do
+    article.with_body do
       pdf.text 'The weather is good.'
     end
   end
@@ -174,7 +187,7 @@ Instead we're forced to use this:
 ```ruby
 # Cumbersome, but it has its advantages.
 ButtonComponent.new.render_in(pdf) do |button|
-  button.title do
+  button.with_title do
     pdf.text 'I am a button'
   end
 end
@@ -185,7 +198,7 @@ The technical reason behind this is this:
 ```ruby
 # This causes a problem for the block/yield mechanism.
 BoxComponent.new.render_in(pdf) do |box|
-  box.title do
+  box.with_title do
     pdf.text 'I am the title'
   end
 
@@ -216,10 +229,7 @@ and after years of iterations, we finally landed
 
 So, now that that API is somewhat stable, I felt it was time to use it with Prawn.
 
-## Requirements
-
-* Ruby >= 2.3.0 (something like that)
-
 ## Copyright
 
-MIT 2021 halo. See [MIT-LICENSE](http://github.com/halo/prawn-component/blob/master/LICENSE.md).
+MIT 2021 halo, `SPDX-License-Identifier: MIT`.
+See [MIT-LICENSE](http://github.com/halo/prawn-component/blob/master/LICENSE.md).

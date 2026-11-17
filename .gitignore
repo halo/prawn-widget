@@ -4,3 +4,6 @@
 # Caches
 .bundle
 /.rubocop-https*
+
+# Generated test output
+/tmp/

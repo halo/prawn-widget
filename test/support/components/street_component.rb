@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# SPDX-License-Identifier: MIT
 class StreetComponent < Prawn::Component
   renders_many :cars
 

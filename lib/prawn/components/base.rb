@@ -1,75 +1,73 @@
+# frozen_string_literal: true
+
+# SPDX-License-Identifier: MIT
 module Prawn
   module Components
-    # Adaptation of to https://github.com/github/view_component/blob/a4e7296a6158a8656a0cd7bc868e1533cd4ee7d8/lib/view_component/base.rb
+    # Adaptation of https://github.com/ViewComponent/view_component/blob/main/lib/view_component/slotable.rb
     # But without action view and caching.
-    #
-    # Copyright (c) 2019 GitHub
-    #
-    # Permission is hereby granted, free of charge, to any person obtaining a copy
-    # of this software and associated documentation files (the "Software"), to deal
-    # in the Software without restriction, including without limitation the rights
-    # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    # copies of the Software, and to permit persons to whom the Software is
-    # furnished to do so, subject to the following conditions:
-    #
-    # The above copyright notice and this permission notice shall be included in all
-    # copies or substantial portions of the Software.
-    #
-    # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    # SOFTWARE.
-    #
+    # ViewComponent adaptation, MIT (c) 2019 GitHub.
     class Base
-      include ::Prawn::Components::MethodObject
+      include ::Calls
+
+      # Components are instantiated with `.new`, not `.call`.
+      # The `calls` gem makes `.new` private.
+      # We make `.new` public again so components render via `Component.new.render_in(pdf)`.
+      public_class_method :new
 
       class_attribute :registered_slots
       self.registered_slots = {}
 
       def self.renders_one(slot_name, callable = nil)
-        define_method slot_name do |*args, **kwargs, &block|
-          if args.empty? && kwargs.empty? && block.nil?
-            get_slot(slot_name)
-          else
-            set_slot(slot_name, *args, **kwargs, &block)
-          end
+        define_method(:"with_#{slot_name}") do |*args, **kwargs, &block|
+          set_slot(slot_name, *args, **kwargs, &block)
         end
 
-        register_slot(slot_name, collection: false, callable: callable)
+        define_method(slot_name) do |*args, **kwargs, &block|
+          set_or_get_deprecated(slot_name, :"with_#{slot_name}", *args, **kwargs, &block)
+        end
+
+        register_slot(slot_name, collection: false, callable:)
       end
 
       def self.renders_many(slot_name, callable = nil)
         singular_name = ActiveSupport::Inflector.singularize(slot_name)
 
+        define_method(:"with_#{singular_name}") do |*args, **kwargs, &block|
+          set_slot(slot_name, *args, **kwargs, &block)
+        end
+
         # Define setter for singular names
         # e.g. `renders_many :items` allows fetching all tabs with
         # `component.tabs` and setting a tab with `component.tab`
-        define_method singular_name do |*args, **kwargs, &block|
+        define_method(singular_name) do |*args, **kwargs, &block|
+          deprecate(singular_name, :"with_#{singular_name}")
+
           set_slot(slot_name, *args, **kwargs, &block)
         end
 
         # Instantiates and and adds multiple slots forwarding the first
         # argument to each slot constructor
-        define_method slot_name do |collection_args = nil, &block|
+        define_method(:"with_#{slot_name}") do |collection_args = nil, &block|
+          set_many_slots(slot_name, collection_args, &block)
+        end
+
+        define_method(slot_name) do |collection_args = nil, &block|
           if collection_args.nil? && block.nil?
             get_slot(slot_name)
           else
-            collection_args.each do |args|
-              set_slot(slot_name, **args, &block)
-            end
+            deprecate(slot_name, :"with_#{slot_name}")
+
+            set_many_slots(slot_name, collection_args, &block)
           end
         end
 
-        register_slot(slot_name, collection: true, callable: callable)
+        register_slot(slot_name, collection: true, callable:)
       end
 
       # Clone slot configuration into child class
       # see #test_slots_pollution
       def self.inherited(child)
-        child.registered_slots = self.registered_slots.clone
+        child.registered_slots = registered_slots.clone
         super
       end
 
@@ -77,16 +75,10 @@ module Prawn
 
       def self.register_slot(slot_name, collection:, callable:)
         # Setup basic slot data
-        slot = {
-          collection: collection,
-        }
+        slot = { collection: }
         # If callable responds to `render_in`, we set it on the slot as a renderable
-        if callable && callable.respond_to?(:method_defined?) && callable.method_defined?(:render_in)
+        if callable.respond_to?(:method_defined?) && callable.method_defined?(:render_in)
           slot[:renderable] = callable
-
-        elsif callable.is_a?(String)
-          # If callable is a string, we assume it's referencing an internal class
-          slot[:renderable_class_name] = callable
 
         elsif callable
           # If slot does not respond to `render_in`, we assume it's a proc,
@@ -97,11 +89,11 @@ module Prawn
         end
 
         # Register the slot on the component
-        self.registered_slots[slot_name] = slot
+        registered_slots[slot_name] = slot
       end
       private_class_method :register_slot
 
-      def set_slot(slot_name, *args, **kwargs, &block)
+      def set_slot(slot_name, *, **, &block)
         slot_definition = self.class.registered_slots[slot_name]
 
         slot = Slot.new(self)
@@ -117,26 +109,7 @@ module Prawn
         # `view_context.capture` twice, which is slower
         slot._content_block = block if block_given?
 
-        if slot_definition[:renderable]
-          # If class
-          slot._component_instance = slot_definition[:renderable].new(*args, **kwargs)
-
-        elsif slot_definition[:renderable_class_name]
-          # If class name as a string
-          slot._component_instance = self.class.const_get(slot_definition[:renderable_class_name]).new(*args, **kwargs)
-
-        elsif slot_definition[:renderable_function]
-          # If passed a lambda
-          # Use `bind(self)` to ensure lambda is executed in the context of the
-          # current component. This is necessary to allow the lambda to access helper
-          # methods like `content_tag` as well as parent component state.
-          renderable_value = slot_definition[:renderable_function].bind(self).call(*args, **kwargs, &block)
-
-          # Function calls can return components, so if it's a component handle it specially
-          if renderable_value.respond_to?(:render_in)
-            slot._component_instance = renderable_value
-          end
-        end
+        build_slot_component(slot_definition, slot, *, **, &block)
 
         @_set_slots ||= {}
 
@@ -147,22 +120,35 @@ module Prawn
           @_set_slots[slot_name] = slot
         end
 
-        nil
+        slot
       end
 
+      # Creates the renderable for a slot, if the slot declares one.
+      # Plain slots without a callable only carry the content block.
+      def build_slot_component(slot_definition, slot, *, **, &)
+        if slot_definition[:renderable]
+          # If class
+          slot._component_instance = slot_definition[:renderable].new(*, **)
+
+        elsif slot_definition[:renderable_function]
+          # If passed a lambda
+          # Use `bind(self)` to ensure lambda is executed in the context of the
+          # current component. This is necessary to allow the lambda to access helper
+          # methods like `content_tag` as well as parent component state.
+          renderable_value = slot_definition[:renderable_function].bind(self).call(*, **, &)
+
+          # Function calls can return components, so if it's a component handle it specially
+          slot._component_instance = renderable_value if renderable_value.respond_to?(:render_in)
+        end
+      end
 
       def get_slot(slot_name)
-        slot = self.class.registered_slots[slot_name]
         @_set_slots ||= {}
 
-        if @_set_slots[slot_name]
-          return @_set_slots[slot_name]
-        end
-
-        if slot[:collection]
-          []
-        else
-          nil
+        # Unset slots read as empty, so getters never return stale state.
+        # Collections read as an empty list, single slots read as nil.
+        @_set_slots.fetch(slot_name) do
+          self.class.registered_slots[slot_name][:collection] ? [] : nil
         end
       end
 
@@ -180,13 +166,42 @@ module Prawn
       end
 
       # However, we also provide this custom method to have the component handle the `yield` itself.
-      def call_in(pdf, &block)
+      def call_in(pdf, &)
         @pdf = pdf
 
-        call(&block) if render?
+        call(&) if render?
       end
 
       private
+
+      # Tell the caller about the new spelling, then carry on with it.
+      # The old spelling keeps working until the next major release.
+      def deprecate(old_name, new_name)
+        warn "[prawn-components] DEPRECATION: `#{old_name}` is deprecated, use `#{new_name}` instead."
+      end
+
+      # Reads the slot when called bare, warns and writes it otherwise.
+      # Keeps the old spelling working next to the `with_` spelling.
+      def set_or_get_deprecated(slot_name, new_name, *args, **kwargs, &block)
+        if args.empty? && kwargs.empty? && block.nil?
+          get_slot(slot_name)
+        else
+          deprecate(slot_name, new_name)
+
+          set_slot(slot_name, *args, **kwargs, &block)
+        end
+      end
+
+      # Adds one slot per entry, forwarding each entry to the slot constructor.
+      def set_many_slots(slot_name, collection_args, &)
+        collection_args.map do |collection_item_args|
+          if collection_item_args.respond_to?(:to_hash)
+            set_slot(slot_name, **collection_item_args, &)
+          else
+            set_slot(slot_name, *collection_item_args, &)
+          end
+        end
+      end
 
       attr_reader :pdf
 

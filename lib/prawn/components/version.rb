@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
+# SPDX-License-Identifier: MIT
 module Prawn
   module Components
-    module VERSION #:nodoc:
-      MAJOR = 1
+    module VERSION # :nodoc:
+      MAJOR = 2
       MINOR = 0
       TINY  = 0
       PRE = nil
