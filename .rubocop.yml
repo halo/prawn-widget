@@ -1,0 +1,15 @@
+AllCops:
+  DisplayCopNames: true
+  NewCops: enable
+  TargetRubyVersion: 4.0
+  SuggestExtensions: false
+
+# Automatically add frozen string safety comments.
+Style/FrozenStringLiteralComment:
+  SafeAutoCorrect: true
+
+Lint/UselessAssignment:
+  AutoCorrect: false
+
+Style/HashSyntax:
+  EnforcedShorthandSyntax: always
